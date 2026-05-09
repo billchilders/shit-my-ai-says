@@ -3,18 +3,49 @@ layout: layouts/base.njk
 title: Gallery
 ---
 <section class="hero">
-  <p class="eyebrow">Tiny museum</p>
-  <h1>Shit My AI Says</h1>
-  <p class="hero-copy">A curated scrapbook of funny, weird, sweet, and mildly feral chat moments.</p>
+  <div class="hero-copy-block">
+    <p class="eyebrow">Tiny museum</p>
+    <h1>Shit My AI Says</h1>
+    <p class="hero-copy">A curated scrapbook of funny, weird, sweet, and mildly feral chat moments, with just enough polish to pretend this was always a responsible idea.</p>
+  </div>
+  <aside class="hero-note">
+    <p class="hero-note-label">Exhibit standard</p>
+    <p>Real screenshots, a little setup, and one Tuesday remark for the record.</p>
+  </aside>
 </section>
 
 {% set posts = collections.post | reverse %}
 {% if posts and posts.length %}
+{% set featured = posts[0] %}
+<section class="featured-exhibit">
+  <div class="featured-copy">
+    <p class="section-label">Featured exhibit</p>
+    <h2>{{ featured.data.title }}</h2>
+    {% if featured.data.caption %}
+    <p class="featured-caption">{{ featured.data.caption }}</p>
+    {% endif %}
+    <div class="featured-meta">
+      <span>{{ featured.date | displayDate }}</span>
+      <span>Filed under conversational incidents</span>
+    </div>
+    <a href="{{ featured.url }}" class="featured-link">Enter exhibit →</a>
+  </div>
+  <a href="{{ featured.url }}" class="featured-image-frame">
+    <img src="/{{ featured.data.image }}" alt="Screenshot preview for {{ featured.data.title }}">
+  </a>
+</section>
+
+<section class="gallery-intro">
+  <p class="section-label">Collection archive</p>
+  <p class="section-copy">Little dispatches from the overlap between discovery, humor, and the occasional beautifully strange chat moment.</p>
+</section>
 <section class="gallery">
   {% for post in posts %}
   <article class="post-card">
     <a href="{{ post.url }}" class="post-card-link">
-      <img src="/{{ post.data.image }}" alt="Screenshot preview for {{ post.data.title }}">
+      <div class="post-card-frame">
+        <img src="/{{ post.data.image }}" alt="Screenshot preview for {{ post.data.title }}">
+      </div>
       <div class="post-card-body">
         <p class="post-card-date">{{ post.date | displayDate }}</p>
         <h2>{{ post.data.title }}</h2>
