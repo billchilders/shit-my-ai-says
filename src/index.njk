@@ -28,10 +28,10 @@ title: Gallery
       <span>{{ featured.date | displayDate }}</span>
       <span>Filed under conversational incidents</span>
     </div>
-    <a href="{{ featured.url }}" class="featured-link">Enter exhibit →</a>
+    <a href="{{ site.baseUrl | url }}{{ featured.url | replace('/','',1) }}" class="featured-link">Enter exhibit →</a>
   </div>
-  <a href="{{ featured.url }}" class="featured-image-frame">
-    <img src="/{{ featured.data.image }}" alt="Screenshot preview for {{ featured.data.title }}">
+  <a href="{{ site.baseUrl | url }}{{ featured.url | replace('/','',1) }}" class="featured-image-frame">
+    <img src="{% asset featured.data.image %}" alt="Screenshot preview for {{ featured.data.title }}">
   </a>
 </section>
 
@@ -42,9 +42,9 @@ title: Gallery
 <section class="gallery">
   {% for post in posts %}
   <article class="post-card">
-    <a href="{{ post.url }}" class="post-card-link">
+    <a href="{{ site.baseUrl | url }}{{ post.url | replace('/','',1) }}" class="post-card-link">
       <div class="post-card-frame">
-        <img src="/{{ post.data.image }}" alt="Screenshot preview for {{ post.data.title }}">
+        <img src="{% asset post.data.image %}" alt="Screenshot preview for {{ post.data.title }}">
       </div>
       <div class="post-card-body">
         <p class="post-card-date">{{ post.date | displayDate }}</p>

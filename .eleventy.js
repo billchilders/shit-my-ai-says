@@ -1,6 +1,12 @@
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "assets": "assets" });
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
+  eleventyConfig.addShortcode("asset", function(path) {
+    const base = (this.ctx.site && this.ctx.site.baseUrl) || "/";
+    const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+    const normalizedPath = String(path).replace(/^\//, "");
+    return `${normalizedBase}${normalizedPath}`;
+  });
   eleventyConfig.addCollection("post", function(collectionApi) {
     return collectionApi.getFilteredByGlob("./content/posts/*.md");
   });
