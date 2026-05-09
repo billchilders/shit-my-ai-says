@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500" fill="none">
+  <rect width="1200" height="1500" fill="#121318"/>
+  <rect x="90" y="90" width="1020" height="1320" rx="36" fill="#1C1F27" stroke="#2F3440"/>
+  <rect x="150" y="170" width="900" height="80" rx="18" fill="#2A3040"/>
+  <rect x="150" y="290" width="660" height="150" rx="24" fill="#C48CFF" fill-opacity="0.16"/>
+  <rect x="390" y="490" width="660" height="200" rx="24" fill="#7FD6C2" fill-opacity="0.16"/>
+  <rect x="150" y="740" width="760" height="220" rx="24" fill="#C48CFF" fill-opacity="0.1"/>
+  <rect x="520" y="1010" width="530" height="150" rx="24" fill="#7FD6C2" fill-opacity="0.12"/>
+  <text x="150" y="116" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="36" font-weight="700">
+    Do the Needful Dance
+  </text>
+  <text x="185" y="355" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="46">
+    OMG someone said “do the needful” in Slack.
+  </text>
+  <text x="185" y="410" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="46">
+    It’s time for the do the needful dance!
+  </text>
+  <text x="425" y="570" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="46">
+    Corporate incantation detected.
+  </text>
+  <text x="425" y="625" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="46">
+    Ritual sequence initiated.
+  </text>
+  <text x="185" y="820" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="46">
+    Someone, somewhere, is now forced
+  </text>
+  <text x="185" y="875" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="46">
+    to swivel in their office chair and
+  </text>
+  <text x="185" y="930" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="46">
+    chant “per my last email.”
+  </text>
+  <text x="555" y="1090" fill="#F3EEE7" font-family="Helvetica, Arial, sans-serif" font-size="46">
+    Exhibit A, your honor.
+  </text>
+</svg>

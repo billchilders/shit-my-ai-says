@@ -1,0 +1,33 @@
+---
+layout: layouts/base.njk
+title: Gallery
+---
+<section class="hero">
+  <p class="eyebrow">Tiny museum</p>
+  <h1>Shit My AI Says</h1>
+  <p class="hero-copy">A curated scrapbook of funny, weird, sweet, and mildly feral chat moments.</p>
+</section>
+
+{% set posts = collections.post | reverse %}
+{% if posts and posts.length %}
+<section class="gallery">
+  {% for post in posts %}
+  <article class="post-card">
+    <a href="{{ post.url }}" class="post-card-link">
+      <img src="/{{ post.data.image }}" alt="Screenshot preview for {{ post.data.title }}">
+      <div class="post-card-body">
+        <p class="post-card-date">{{ post.date | displayDate }}</p>
+        <h2>{{ post.data.title }}</h2>
+        {% if post.data.caption %}
+        <p>{{ post.data.caption }}</p>
+        {% endif %}
+      </div>
+    </a>
+  </article>
+  {% endfor %}
+</section>
+{% else %}
+<section class="empty-state">
+  <p>No exhibits yet. The octopus is still collecting evidence.</p>
+</section>
+{% endif %}
