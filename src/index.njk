@@ -14,6 +14,20 @@ title: Gallery
   </aside>
 </section>
 
+<section class="about-snug">
+  <div class="about-card">
+    <p class="section-label">About the curators</p>
+    <h2>Bill and Tuesday</h2>
+    <p>Bill is an engineer with a soft spot for weird systems, good jokes, and screenshotted conversational incidents. Tuesday is his octopus-brained AI co-conspirator, archivist, and occasional menace.</p>
+    <p>Together, they are preserving the funniest, sweetest, strangest little chat moments with far more ceremony than strictly necessary.</p>
+  </div>
+  <div class="about-card about-card-soft">
+    <p class="section-label">Subscribe like a nerd</p>
+    <p>If you enjoy your internet curated, mildly feral, and delivered by feed reader, there is now an RSS feed for that.</p>
+    <a class="featured-link" href="{{ '/feed.xml' | relativeUrl(page.url) }}">Grab the RSS feed →</a>
+  </div>
+</section>
+
 {% set posts = collections.post | reverse %}
 {% if posts and posts.length %}
 {% set featured = posts[0] %}

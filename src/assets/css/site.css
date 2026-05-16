@@ -116,6 +116,52 @@ p { margin: 0; }
   margin-top: 10px;
 }
 
+.site-header-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.site-rss-link {
+  color: var(--accent-2);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.about-snug {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+  gap: 24px;
+  margin: 8px 0 32px;
+}
+
+.about-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--panel);
+}
+
+.about-card-soft {
+  background:
+    linear-gradient(180deg, rgba(130,219,195,0.1), rgba(211,155,255,0.06)),
+    var(--panel-strong);
+}
+
+.about-card h2 {
+  margin: 10px 0 14px;
+  font-family: Fraunces, Georgia, serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  line-height: 1;
+}
+
+.about-card p + p {
+  margin-top: 10px;
+}
+
 .featured-exhibit {
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.15fr);
@@ -325,6 +371,7 @@ p { margin: 0; }
 
 @media (max-width: 860px) {
   .hero,
+  .about-snug,
   .post-meta-grid,
   .gallery-intro,
   .post-header,

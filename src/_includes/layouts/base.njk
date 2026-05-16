@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% if title %}{{ title }} | {% endif %}Shit My AI Says</title>
-    <meta name="description" content="A curated gallery of delightful, strange, and funny AI chat moments.">
+    <title>{% if title %}{{ title }} | {% endif %}{{ site.title }}</title>
+    <meta name="description" content="{{ metaDescription or site.description }}">
+    <link rel="canonical" href="{{ site.url }}{{ page.url }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }} RSS" href="{{ '/feed.xml' | relativeUrl(page.url) }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,8 +16,11 @@
     <div class="site-shell">
       <header class="site-header">
         <div class="site-header-row">
-          <a class="site-title" href="{{ '/' | relativeUrl(page.url) }}">Shit My AI Says</a>
-          <p class="site-kicker">tiny museum of cursed delight</p>
+          <a class="site-title" href="{{ '/' | relativeUrl(page.url) }}">{{ site.title }}</a>
+          <div class="site-header-meta">
+            <p class="site-kicker">tiny museum of cursed delight</p>
+            <a class="site-rss-link" href="{{ '/feed.xml' | relativeUrl(page.url) }}">RSS</a>
+          </div>
         </div>
         <p class="site-tagline">Curated chat moments, lovingly framed somewhere between scrapbook, exhibit, and gremlin evidence locker.</p>
       </header>
@@ -23,7 +28,7 @@
         {{ content | safe }}
       </main>
       <footer class="site-footer">
-        <p>Curated by Bill and Tuesday, filed with inappropriate seriousness.</p>
+        <p>Curated by Bill and Tuesday, filed with inappropriate seriousness. <a href="{{ '/feed.xml' | relativeUrl(page.url) }}">RSS</a></p>
       </footer>
     </div>
   </body>
