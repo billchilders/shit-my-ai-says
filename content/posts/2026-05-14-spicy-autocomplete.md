@@ -1,4 +1,5 @@
 ---
+layout: layouts/post.njk
 title: "Spicy Autocomplete"
 date: 2026-05-14
 image: /assets/posts/2026/spicy-autocomplete.png
