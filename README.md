@@ -85,9 +85,12 @@ tags:
   - post
   - silly
   - wordplay
+socialTags:
+  - ShitMyAISays
 title: Times New Ramen
 date: 2026-05-09
 image: assets/posts/2026/times-new-ramen.png
+imageAlt: A screenshot of a late-night AI chat where the phrase "Times New Ramen" lands as the punchline after cocktails and vibe coding.
 caption: When you’ve been vibe coding with your AI after some cocktails and finally call it a night…
 tuesdayComment: Times New Ramen is regrettably perfect.
 ---
@@ -98,8 +101,10 @@ Important fields:
 - `title`: display title
 - `date`: used for display and ordering
 - `image`: path to the screenshot asset
+- `imageAlt`: alt text for the screenshot, used on social uploads
 - `caption`: the setup or context for the screenshot
 - `tuesdayComment`: the short house-commentary line
+- `socialTags`: optional hashtags to append on social posts
 - `tags`: currently mostly decorative, but still useful metadata
 
 At the moment, posts do **not** require markdown body content. The frontmatter is the post.
@@ -134,7 +139,7 @@ Notes about `scripts/new-post.mjs`:
 - it creates the markdown file only
 - it assumes the image will be named `assets/posts/<year>/<slug>.png`
 - it does **not** copy or process the screenshot automatically
-- it leaves `tuesdayComment: TODO` for manual editing
+- it leaves `imageAlt: TODO` and `tuesdayComment: TODO` for manual editing
 
 ## Local development
 
@@ -262,34 +267,44 @@ These are reasonable next steps that fit the current architecture:
 - add a post body field for extra commentary if desired
 - automate cross-posting to social after publish
 
-## Planned social-post echo integration
+## Social publishing
 
-The likely clean design is:
+This repo now includes a separate GitHub Actions workflow for social echoes:
 
 1. **Canonical publish remains the site repo**
    - add screenshot + markdown post
    - push to `main`
    - GitHub Pages publishes
 
-2. **Social echo triggers after publish**
-   - probably via GitHub Actions
-   - use the post metadata already present in the markdown file
+2. **Social workflow watches for new post files**
+   - it only considers newly added files in `content/posts/`
+   - edits to old posts do not repost them by default
+   - `draftSocial: true` skips a post entirely
 
-3. **Targets**
-   - **Bluesky** via AtProto client/library or direct API calls
-   - **Mastodon** via its normal REST API
+3. **Source of truth is frontmatter**
+   - `caption` becomes the social body
+   - `socialTags` becomes hashtags
+   - `image` is uploaded to both platforms
+   - `imageAlt` is required for publishable posts
 
-4. **Secrets**
-   - store credentials in GitHub Actions secrets
-   - do not hardcode tokens in the repo
+4. **Targets**
+   - **Bluesky** via `@atproto/api`
+   - **Mastodon** via the REST API
 
-5. **Suggested behavior for v1**
-   - detect the newly added post
-   - post caption + Tuesday comment + link
-   - optional image attachment later if the API flow is worth it
+5. **Local dry-run**
+```bash
+node scripts/publish-social.mjs --post content/posts/2026-05-17-tiny-octopus-girlfriend.md --dry-run
+```
 
-6. **Why this approach is sane**
+6. **GitHub Actions secrets**
+   - `BSKY_IDENTIFIER`
+   - `BSKY_APP_PASSWORD`
+   - `MASTODON_BASE_URL`
+   - `MASTODON_ACCESS_TOKEN`
+
+7. **Why this approach is sane**
    - one canonical source of truth
+   - accessibility is part of the content contract, not an afterthought
    - low operational complexity
    - easy to debug from Git history and Actions logs
    - no separate publishing app required

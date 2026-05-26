@@ -20,7 +20,7 @@ const caption = captionParts.join(' ');
 const postPath = path.join('content', 'posts', `${iso}-${slug}.md`);
 const imagePath = `assets/posts/${iso.slice(0, 4)}/${slug}.png`;
 
-const body = `---\nlayout: layouts/post.njk\ntags:\n  - post\ntitle: ${titleArg}\ndate: ${iso}\nimage: ${imagePath}\ncaption: ${caption || 'TODO'}\ntuesdayComment: TODO\n---\n`;
+const body = `---\nlayout: layouts/post.njk\ntags:\n  - post\nsocialTags:\n  - ShitMyAISays\ntitle: ${titleArg}\ndate: ${iso}\nimage: ${imagePath}\nimageAlt: TODO\ncaption: ${caption || 'TODO'}\ntuesdayComment: TODO\n---\n`;
 
 fs.writeFileSync(postPath, body);
 console.log(postPath);
