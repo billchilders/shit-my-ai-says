@@ -1,7 +1,12 @@
 const path = require("node:path");
 
 module.exports = function(eleventyConfig) {
-  eleventyConfig.addPassthroughCopy({ "assets": "assets" });
+  eleventyConfig.ignores.add("./index.html");
+  eleventyConfig.ignores.add("./feed.xml");
+  eleventyConfig.ignores.add("./posts/**");
+  eleventyConfig.ignores.add("./assets/posts/**/README.md");
+
+  eleventyConfig.addPassthroughCopy({ "assets/posts": "assets/posts" });
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
   eleventyConfig.addShortcode("asset", function(assetPath) {
     const rawPath = String(assetPath).replace(/^\//, "");

@@ -1,3 +1,7 @@
 node_modules/
 _site/
 .DS_Store
+/index.html
+/feed.xml
+/posts/
+/assets/css/
