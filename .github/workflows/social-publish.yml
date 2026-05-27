@@ -53,13 +53,20 @@ jobs:
           MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
         run: |
           args=()
+          trim() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
           if [ "${{ github.event_name }}" = "push" ]; then
             args+=(--dry-run)
           fi
           if [ "${{ github.event.inputs.dry_run || 'true' }}" = "true" ]; then
             args+=(--dry-run)
           fi
-          if [ -n "${{ github.event.inputs.post_path || '' }}" ]; then
-            args+=(--post "${{ github.event.inputs.post_path }}")
+          post_path="$(trim "${{ github.event.inputs.post_path || '' }}")"
+          if [ -n "$post_path" ]; then
+            args+=(--post "$post_path")
           fi
           node scripts/publish-social.mjs "${args[@]}"

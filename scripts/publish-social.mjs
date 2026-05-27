@@ -9,6 +9,8 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const repoRoot = process.cwd();
 const siteData = require(path.join(repoRoot, 'src', 'src.11tydata.js'));
+const REQUEST_TIMEOUT_MS = 30_000;
+const MAX_ATTEMPTS = 3;
 
 const args = process.argv.slice(2);
 const opts = parseArgs(args);
@@ -66,7 +68,7 @@ function parseArgs(argv) {
       continue;
     }
     if (arg === '--post') {
-      options.post = argv[i + 1];
+      options.post = sanitizePostPath(argv[i + 1]);
       i += 1;
       continue;
     }
@@ -83,7 +85,7 @@ function parseArgs(argv) {
 
 async function resolvePostFiles(options) {
   if (options.post) {
-    return [options.post];
+    return [sanitizePostPath(options.post)];
   }
 
   const range = options.range || inferGitRange();
@@ -103,7 +105,7 @@ async function resolvePostFiles(options) {
 
   return diffOutput
     .split('\n')
-    .map((line) => line.trim())
+    .map((line) => sanitizePostPath(line))
     .filter(Boolean);
 }
 
@@ -117,15 +119,20 @@ function inferGitRange() {
 }
 
 async function loadPost(postFile) {
-  const absolute = path.resolve(repoRoot, postFile);
+  const normalizedPostFile = sanitizePostPath(postFile);
+  const absolute = path.resolve(repoRoot, normalizedPostFile);
   const raw = await fs.readFile(absolute, 'utf8');
   const parsed = matter(raw);
   return {
-    file: postFile,
+    file: normalizedPostFile,
     absolute,
-    slug: path.basename(postFile, path.extname(postFile)).replace(/^\d{4}-\d{2}-\d{2}-/, ''),
+    slug: path.basename(normalizedPostFile, path.extname(normalizedPostFile)).replace(/^\d{4}-\d{2}-\d{2}-/, ''),
     data: parsed.data
   };
+}
+
+function sanitizePostPath(value) {
+  return String(value || '').trim();
 }
 
 function validatePost(post) {
@@ -214,19 +221,23 @@ function printDryRun(payload, configuredTargets) {
 
 async function publishToBluesky(payload) {
   const agent = new BskyAgent({ service: 'https://bsky.social' });
-  await agent.login({
+  console.log('Bluesky: logging in');
+  await withRetries('Bluesky login', async () => agent.login({
     identifier: process.env.BSKY_IDENTIFIER,
     password: process.env.BSKY_APP_PASSWORD
-  });
+  }));
 
-  const upload = await agent.uploadBlob(new Uint8Array(payload.imageBuffer), {
+  console.log('Bluesky: uploading image');
+  const upload = await withRetries('Bluesky image upload', async () => agent.uploadBlob(new Uint8Array(payload.imageBuffer), {
     encoding: payload.imageMimeType
-  });
+  }));
 
   const richText = new RichText({ text: payload.text });
-  await richText.detectFacets(agent);
+  console.log('Bluesky: detecting facets');
+  await withRetries('Bluesky facet detection', async () => richText.detectFacets(agent));
 
-  const response = await agent.post({
+  console.log('Bluesky: creating post');
+  const response = await withRetries('Bluesky post create', async () => agent.post({
     text: richText.text,
     facets: richText.facets,
     embed: {
@@ -239,7 +250,7 @@ async function publishToBluesky(payload) {
       ]
     },
     createdAt: new Date().toISOString()
-  });
+  }), { retries: 1 });
 
   console.log(`Bluesky post created: ${response.uri}`);
 }
@@ -249,16 +260,17 @@ async function publishToMastodon(payload) {
   mediaForm.set('file', new Blob([payload.imageBuffer], { type: payload.imageMimeType }), path.basename(payload.imagePath));
   mediaForm.set('description', payload.imageAlt);
 
-  const mediaResponse = await fetch(new URL('/api/v2/media', process.env.MASTODON_BASE_URL), {
+  console.log('Mastodon: uploading media');
+  const mediaResponse = await withRetries('Mastodon media upload', async () => fetchWithTimeout(new URL('/api/v2/media', process.env.MASTODON_BASE_URL), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${process.env.MASTODON_ACCESS_TOKEN}`
     },
     body: mediaForm
-  });
+  }));
 
   if (!mediaResponse.ok) {
-    throw new Error(`Mastodon media upload failed: ${mediaResponse.status} ${await mediaResponse.text()}`);
+    throw new Error(`Mastodon media upload failed: ${mediaResponse.status} ${await responseText(mediaResponse)}`);
   }
 
   const media = await mediaResponse.json();
@@ -267,7 +279,8 @@ async function publishToMastodon(payload) {
   statusForm.append('media_ids[]', media.id);
   statusForm.set('visibility', 'public');
 
-  const statusResponse = await fetch(new URL('/api/v1/statuses', process.env.MASTODON_BASE_URL), {
+  console.log('Mastodon: creating status');
+  const statusResponse = await withRetries('Mastodon status create', async () => fetchWithTimeout(new URL('/api/v1/statuses', process.env.MASTODON_BASE_URL), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${process.env.MASTODON_ACCESS_TOKEN}`,
@@ -275,10 +288,10 @@ async function publishToMastodon(payload) {
       'Idempotency-Key': stableId(`mastodon:${payload.url}`)
     },
     body: statusForm
-  });
+  }));
 
   if (!statusResponse.ok) {
-    throw new Error(`Mastodon status publish failed: ${statusResponse.status} ${await statusResponse.text()}`);
+    throw new Error(`Mastodon status publish failed: ${statusResponse.status} ${await responseText(statusResponse)}`);
   }
 
   const status = await statusResponse.json();
@@ -287,6 +300,68 @@ async function publishToMastodon(payload) {
 
 function stableId(input) {
   return crypto.createHash('sha256').update(input).digest('hex');
+}
+
+async function withRetries(label, fn, options = {}) {
+  const retries = options.retries ?? MAX_ATTEMPTS;
+  let attempt = 0;
+  let lastError;
+  while (attempt < retries) {
+    attempt += 1;
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt >= retries || !isRetryableError(error)) {
+        throw decorateError(label, attempt, error);
+      }
+      const delayMs = attempt * 2_000;
+      console.warn(`${label} failed on attempt ${attempt}/${retries}: ${error.message}. Retrying in ${delayMs}ms.`);
+      await sleep(delayMs);
+    }
+  }
+  throw decorateError(label, attempt, lastError);
+}
+
+function isRetryableError(error) {
+  const message = String(error?.message || error || '');
+  return [
+    'UpstreamTimeout',
+    'timeout',
+    'timed out',
+    'fetch failed',
+    'ECONNRESET',
+    'ETIMEDOUT',
+    'EAI_AGAIN',
+    'socket hang up',
+    '502',
+    '503',
+    '504'
+  ].some((needle) => message.toLowerCase().includes(needle.toLowerCase()));
+}
+
+function decorateError(label, attempt, error) {
+  const message = error instanceof Error ? error.message : String(error);
+  return new Error(`${label} failed after ${attempt} attempt${attempt === 1 ? '' : 's'}: ${message}`);
+}
+
+async function fetchWithTimeout(url, options) {
+  return await fetch(url, {
+    ...options,
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+  });
+}
+
+async function responseText(response) {
+  try {
+    return await response.text();
+  } catch {
+    return '(unable to read response body)';
+  }
+}
+
+function sleep(delayMs) {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
 async function git(args) {
