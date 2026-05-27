@@ -59,9 +59,6 @@ jobs:
             value="${value%"${value##*[![:space:]]}"}"
             printf '%s' "$value"
           }
-          if [ "${{ github.event_name }}" = "push" ]; then
-            args+=(--dry-run)
-          fi
           if [ "${{ github.event.inputs.dry_run || 'true' }}" = "true" ]; then
             args+=(--dry-run)
           fi
